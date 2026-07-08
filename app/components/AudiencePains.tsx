@@ -51,6 +51,9 @@ const PAINS = [
   },
 ];
 
+// Вертикальный сдвиг правой колонки болей вниз относительно позиций макета
+const PAINS_OFFSET_PX = 60;
+
 // Направление фона сцены. "light-top" — светлый верх → тёмный низ (пробный
 // вариант); ОТКАТ: поставить "dark-top" (тёмный верх → светлый низ, как intro
 // rwb.ru) и в Program.tsx переключить SEAM_COLOR на "#287a99".
@@ -66,6 +69,7 @@ export default function AudiencePains() {
   const sectionRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
   const painsRef = useRef<HTMLDivElement>(null);
+  const lastPainRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -87,6 +91,13 @@ export default function AudiencePains() {
       pains.style.opacity = String(0.3 + 0.7 * p);
       pains.style.filter = `blur(${(4 * (1 - p)).toFixed(2)}px)`;
       pains.style.transform = `translate3d(0, ${(0.36 * vh * (1 - p)).toFixed(1)}px, 0)`;
+      // нижний блок 04 до скролла размыт сильнее остальных — «растворён»,
+      // проявляется вместе с общим скраб-прогрессом
+      const last = lastPainRef.current;
+      if (last) {
+        last.style.filter = `blur(${(12 * (1 - p)).toFixed(2)}px)`;
+        last.style.opacity = String(0.35 + 0.65 * p);
+      }
     };
     const schedule = () => {
       if (!raf) raf = requestAnimationFrame(update);
@@ -116,11 +127,22 @@ export default function AudiencePains() {
           ref={titleRef}
           className="pointer-events-none absolute inset-0 will-change-transform"
         >
-          <p className="absolute left-[32px] top-[22.4%] text-[18px] font-semibold leading-none tracking-[-0.72px] text-white">
+          {/* подпись: капс 20px bold, трекинг −4% (−0.8px), 60%;
+              нижний край в 20px от верха большого заголовка */}
+          <p
+            className="absolute left-[32px] text-[20px] font-bold uppercase leading-none tracking-[-0.8px] text-white opacity-60"
+            style={{ top: "calc(25.7% - 40px)" }}
+          >
             Кому будет полезно
           </p>
-          <h2 className="font-display absolute left-[30px] top-[25.7%] w-[823px] text-[100px] font-bold leading-[0.81] tracking-[-4px] text-white">
-            Для селлеров, которые выросли из ручного управления
+          {/* типографика заголовка — из макета (нода 1291:576): 80/80 ExtraBold
+              капсом, трекинг −2.4px, переносы фиксированные в 3 строки */}
+          <h2 className="font-display absolute left-[30px] top-[25.7%] w-[1179px] text-[80px] font-extrabold uppercase leading-[80px] tracking-[-2.4px] text-white">
+            Для селлеров,
+            <br />
+            которые выросли
+            <br />
+            из ручного управления
           </h2>
         </div>
 
@@ -129,11 +151,17 @@ export default function AudiencePains() {
           ref={painsRef}
           className="absolute inset-0 opacity-30 blur-[4px] will-change-transform"
         >
-          {PAINS.map((pain) => (
-            <div key={pain.num}>
+          {PAINS.map((pain, i) => (
+            // absolute inset-0: у последнего блока свой filter (containing
+            // block для absolute-потомков), поэтому обёртка растянута на сцену
+            <div
+              key={pain.num}
+              ref={i === PAINS.length - 1 ? lastPainRef : undefined}
+              className="absolute inset-0"
+            >
               <p
                 className="absolute left-[30px] text-[26px] font-bold leading-[1.2] tracking-[-1.04px] text-white"
-                style={{ top: pain.numTop }}
+                style={{ top: `calc(${pain.numTop} + ${PAINS_OFFSET_PX}px)` }}
               >
                 {pain.num}
               </p>
@@ -141,13 +169,19 @@ export default function AudiencePains() {
                 className={`absolute left-[50.35%] text-[38px] leading-none tracking-[-1.52px] text-white ${
                   pain.titleBold ? "font-bold" : "font-semibold"
                 }`}
-                style={{ top: pain.titleTop, width: pain.titleWidth }}
+                style={{
+                  top: `calc(${pain.titleTop} + ${PAINS_OFFSET_PX}px)`,
+                  width: pain.titleWidth,
+                }}
               >
                 {pain.title}
               </p>
               <p
-                className="absolute left-[50.35%] text-[18px] font-semibold leading-[1.2] tracking-[-0.72px] text-[rgba(255,255,255,0.77)]"
-                style={{ top: pain.descTop, width: pain.descWidth }}
+                className="absolute left-[50.35%] text-[18px] font-semibold leading-[1.2] tracking-[-0.72px] text-[rgba(255,255,255,0.8)]"
+                style={{
+                  top: `calc(${pain.descTop} + ${PAINS_OFFSET_PX}px)`,
+                  width: pain.descWidth,
+                }}
               >
                 {pain.desc}
               </p>

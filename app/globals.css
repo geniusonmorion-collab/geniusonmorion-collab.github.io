@@ -142,17 +142,43 @@ body.intro-revealed .hero-photo {
   animation: speaker-label-in 450ms ease-out both;
 }
 
-/* дуга-кольцо «докручивается» вокруг активной аватарки */
-@keyframes speaker-arc-in {
+/* кольцо-таймер вокруг активной аватарки: заполняется от нуля до полного
+   круга за animation-duration (задаётся инлайном из Hero, SLIDE_MS);
+   235.62 = длина окружности r=37.5 (RING_CIRC в Hero.tsx) */
+@keyframes speaker-progress {
   from {
-    opacity: 0;
-    transform: rotate(60deg);
+    stroke-dashoffset: 235.62;
   }
   to {
-    opacity: 1;
-    transform: rotate(-90deg);
+    stroke-dashoffset: 0;
   }
 }
-.animate-speaker-arc {
-  animation: speaker-arc-in 600ms cubic-bezier(0.33, 1, 0.68, 1) both;
+.animate-speaker-progress {
+  animation: speaker-progress linear both;
+}
+
+/* пилюля-таймер инфокарточки: заливка растёт сверху вниз до высоты трека (16px) */
+@keyframes card-progress {
+  from {
+    height: 0;
+  }
+  to {
+    height: 16px;
+  }
+}
+.animate-card-progress {
+  animation: card-progress linear both;
+}
+
+/* полоска-автотаймер на активной карточке программы: 0 → полная ширина */
+@keyframes program-progress {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+.animate-program-progress {
+  animation: program-progress linear both;
 }

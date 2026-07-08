@@ -1,45 +1,103 @@
 "use client";
 
 import Image from "next/image";
+import { useEffect, useRef } from "react";
 import { useReveal } from "./useReveal";
 import { useProgramSpeaker, type ProgramSpeaker } from "./ProgramContext";
 
 // Таймлайн программы (макет 1342:660): карточки — ГОТОВЫЕ рендеры нод из
 // Figma (slot-*.png, 2x), пропорции совпадают с боксом 1:1 — никакого
-// object-fit-кропа, искажения исключены; у 16:00 прогресс-бар запечён,
-// 20:00 зеркалирована самой фигмой. Клик по 16:00/18:30 переключает спикера:
-// плавно меняются фон (оранжевый ↔ бирюзовый), фото и подпись; экран
-// регистрации ниже подстраивается по цвету (ProgramContext).
+// object-fit-кропа, искажения исключены. Клик по карточке спикера
+// переключает его: плавно меняются фон (оранжевый ↔ бирюзовый), фото
+// и подпись; экран регистрации ниже подстраивается по цвету (ProgramContext).
+// Белая полоска на активной карточке — автотаймер: заполняется за
+// PROGRAM_SLIDE_MS и переключает на следующего спикера по кругу;
+// стартует, когда секция впервые показана (revealed).
+const PROGRAM_SLIDE_MS = 6000;
+const ORDER: ProgramSpeaker[] = ["tk", "marina", "galitsky"];
+
+// Мягкое растворение фото к нижней кромке секции: высокая кривая с
+// ease-подобными стопами вместо короткого линейного среза
+const PHOTO_BOTTOM_FADE =
+  "linear-gradient(180deg, #000 calc(100% - 280px), rgba(0,0,0,0.85) calc(100% - 190px), rgba(0,0,0,0.55) calc(100% - 110px), rgba(0,0,0,0.25) calc(100% - 45px), transparent 100%)";
+// У интерактивных карточек два готовых рендера из Figma (фрейм 1402:516):
+// img — неактивное состояние (ч/б на глухом сером), imgActive — активное
+// (цветное на градиенте); смена состояний — кроссфейд слоёв, без CSS-фильтров.
 const SLOTS: {
   time: string;
   left: string;
   width: 95 | 210;
   img: string;
+  imgActive?: string;
   speaker?: ProgramSpeaker;
 }[] = [
   { time: "12:00", left: "40px", width: 95, img: "/img/slot-1200.png" },
   { time: "13:00", left: "calc(8.33% + 35px)", width: 210, img: "/img/slot-1300.png" },
   { time: "14:30", left: "calc(25% + 25px)", width: 95, img: "/img/slot-1430.png" },
   { time: "15:00", left: "calc(33.33% + 20px)", width: 95, img: "/img/slot-1500.png" },
-  { time: "16:00", left: "calc(41.67% + 15px)", width: 210, img: "/img/slot-1600-nobar.png", speaker: "tk" },
+  { time: "16:00", left: "calc(41.67% + 15px)", width: 210, img: "/img/slot-1600-inactive.png", imgActive: "/img/slot-1600-active.png", speaker: "tk" },
   { time: "17:30", left: "calc(58.33% + 5px)", width: 95, img: "/img/slot-1730.png" },
-  { time: "18:30", left: "66.67%", width: 210, img: "/img/slot-1830.png", speaker: "marina" },
-  { time: "20:00", left: "calc(83.33% - 10px)", width: 210, img: "/img/slot-2000.png", speaker: "galitsky" },
+  { time: "18:30", left: "66.67%", width: 210, img: "/img/slot-1830-inactive.png", imgActive: "/img/slot-1830-active.png", speaker: "marina" },
+  { time: "20:00", left: "calc(83.33% - 10px)", width: 210, img: "/img/slot-2000-inactive.png", imgActive: "/img/slot-2000-active.png", speaker: "galitsky" },
 ];
 
+// Заголовок и описание доклада меняются вместе со спикером
 const SPEAKERS: Record<
   ProgramSpeaker,
-  { name: string; title: string }
+  { name: string; title: string; heading: [string, string]; desc: string }
 > = {
-  tk: { name: "татьяна ким", title: "CEO ВБ" },
-  marina: { name: "марина иванова", title: "HRD Wildberries" },
-  galitsky: { name: "сергей галицкий", title: "Предприниматель" },
+  tk: {
+    name: "татьяна ким",
+    title: "CEO ВБ",
+    heading: ["Портал продавцов:", "обновление"],
+    desc: "Татьяна Ким расскажет про ключевые обновления WB Partners и на примере живого кейса покажет как выстроить процессы и контролировать бизнес без перегруза",
+  },
+  marina: {
+    name: "марина иванова",
+    title: "HRD Wildberries",
+    heading: ["Команда продавца:", "рост без хаоса"],
+    desc: "Марина Иванова расскажет, как выстроить команду вокруг растущего бизнеса на маркетплейсе, и на примере реальных кейсов покажет, когда нанимать, а когда — делегировать без потери контроля",
+  },
+  galitsky: {
+    name: "сергей галицкий",
+    title: "Предприниматель",
+    heading: ["Масштаб", "без потери себя"],
+    desc: "Сергей Галицкий поделится опытом роста бизнеса от малого к крупному и расскажет, какие решения на самом деле определяют, выдержит ли компания следующий виток масштабирования",
+  },
 };
 
 export default function Program() {
   const { ref, revealed } = useReveal<HTMLElement>();
   const { speaker, setSpeaker } = useProgramSpeaker();
   const label = SPEAKERS[speaker];
+  const photosRef = useRef<HTMLDivElement>(null);
+
+  // блюр фото при перелистывании: пока секция стоит на снап-точке — фото
+  // резкое, по мере отъезда экрана размывается (до 24px за полный вьюпорт),
+  // чтобы обрезанный низ фото не читался «висящим в воздухе»
+  useEffect(() => {
+    const el = photosRef.current;
+    const section = ref.current;
+    if (!el || !section) return;
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const offset = Math.abs(section.getBoundingClientRect().top);
+      const p = Math.min(1, offset / window.innerHeight);
+      el.style.filter = p > 0.002 ? `blur(${(24 * p).toFixed(1)}px)` : "";
+    };
+    const schedule = () => {
+      if (!raf) raf = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    return () => {
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [ref]);
 
   return (
     <section
@@ -75,8 +133,18 @@ export default function Program() {
       />
 
       {/* фото спикеров — прижаты к низу экрана; reveal-fade на обёртке,
-          чтобы не перебивать кроссфейд между спикерами */}
-      <div className="reveal-fade absolute inset-0">
+          чтобы не перебивать кроссфейд между спикерами.
+          Маска-фейд снизу: фото растворяется к нижней кромке секции высокой
+          плавной кривой (~280px, ease-подобные стопы), чтобы при скролле
+          не было «обрубленного» края, висящего в воздухе */}
+      <div
+        ref={photosRef}
+        className="reveal-fade absolute inset-0"
+        style={{
+          maskImage: PHOTO_BOTTOM_FADE,
+          WebkitMaskImage: PHOTO_BOTTOM_FADE,
+        }}
+      >
       <div
         className={`absolute bottom-[-240px] right-[-63px] h-[1140px] w-[1055px] transition-opacity duration-[800ms] ease-in-out ${
           speaker === "tk" ? "opacity-100" : "opacity-0"
@@ -141,19 +209,24 @@ export default function Program() {
           <span className="size-[5px] rounded-full bg-white/60" />
           <p className="opacity-60">{label.title}</p>
         </div>
-        <h2 className="font-display text-[80px] font-extrabold uppercase leading-[80px] tracking-[-2.4px] text-white">
-          Портал продавцов:
+        <h2
+          key={`heading-${speaker}`}
+          className="animate-speaker-label font-display text-[80px] font-extrabold uppercase leading-[80px] tracking-[-2.4px] text-white"
+        >
+          {label.heading[0]}
           <br />
-          обновление
+          {label.heading[1]}
         </h2>
       </div>
+      {/* reveal-item на внешнем p, смена текста — на внутреннем span
+          (reveal-классы нельзя мешать с анимацией смены, см. грабли) */}
       <p
         className="reveal-item absolute left-[40px] top-[60.1%] w-[599px] text-[20px] font-medium leading-[1.3] tracking-[-0.8px] text-white opacity-80"
         style={{ transitionDelay: "150ms" }}
       >
-        Татьяна Ким расскажет про ключевые обновления WB Partners и на примере
-        живого кейса покажет как выстроить процессы и контролировать бизнес без
-        перегруза
+        <span key={`desc-${speaker}`} className="animate-speaker-label block">
+          {label.desc}
+        </span>
       </p>
 
       {/* таймлайн */}
@@ -168,10 +241,33 @@ export default function Program() {
               height={190}
               className="absolute inset-0 size-full rounded-[10px]"
             />
+            {slot.imgActive && (
+              <Image
+                src={slot.imgActive}
+                alt=""
+                width={slot.width * 2}
+                height={190}
+                className={`absolute inset-0 size-full rounded-[10px] transition-opacity duration-[800ms] ease-in-out ${
+                  isActive ? "opacity-100" : "opacity-0"
+                }`}
+              />
+            )}
             {isActive && (
               <>
                 <div className="absolute left-0 top-0 h-[3px] w-full bg-white opacity-30" />
-                <div className="absolute left-0 top-0 h-[3px] w-[138px] bg-white" />
+                <div
+                  key={`bar-${speaker}`}
+                  className="animate-program-progress absolute left-0 top-0 h-[3px] bg-white"
+                  style={{
+                    animationDuration: `${PROGRAM_SLIDE_MS}ms`,
+                    animationPlayState: revealed ? "running" : "paused",
+                  }}
+                  onAnimationEnd={() =>
+                    setSpeaker(
+                      ORDER[(ORDER.indexOf(speaker) + 1) % ORDER.length]
+                    )
+                  }
+                />
               </>
             )}
           </>
@@ -195,14 +291,14 @@ export default function Program() {
               <button
                 type="button"
                 onClick={() => setSpeaker(slot.speaker!)}
-                className={`reveal-item group absolute top-[85%] h-[95px] cursor-pointer overflow-clip rounded-[10px] transition-shadow duration-500 ${
+                className={`reveal-item group absolute top-[85%] h-[95px] cursor-pointer overflow-clip rounded-[10px] transition-shadow duration-[800ms] ease-in-out ${
                   isActive ? "ring-2 ring-white/90" : ""
                 }`}
                 style={style}
               >
                 <div
-                  className={`absolute inset-0 transition-[filter,opacity] duration-500 ${
-                    isActive ? "" : "opacity-50 grayscale group-hover:opacity-80"
+                  className={`absolute inset-0 transition-[filter] duration-500 ${
+                    isActive ? "" : "group-hover:brightness-125"
                   }`}
                 >
                   {card}
