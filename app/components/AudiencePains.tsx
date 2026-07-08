@@ -54,8 +54,9 @@ const PAINS = [
 // Направление фона сцены. "light-top" — светлый верх → тёмный низ (пробный
 // вариант); ОТКАТ: поставить "dark-top" (тёмный верх → светлый низ, как intro
 // rwb.ru) и в Program.tsx переключить SEAM_COLOR на "#287a99".
-const BG_DIRECTION: "light-top" | "dark-top" = "light-top";
-const BG: Record<typeof BG_DIRECTION, string> = {
+type BgDirection = "light-top" | "dark-top";
+const BG_DIRECTION: BgDirection = "light-top";
+const BG: Record<BgDirection, string> = {
   "dark-top":
     "linear-gradient(#000 20%, #287a99 71%, #a9d0de 90%, #287a99 100%)",
   "light-top": "linear-gradient(#287a99 0%, #000 80%)",
