@@ -73,7 +73,7 @@ export default function Program() {
   const photosRef = useRef<HTMLDivElement>(null);
 
   // блюр фото при перелистывании: пока секция стоит на снап-точке — фото
-  // резкое, по мере отъезда экрана размывается (до 24px за полный вьюпорт),
+  // резкое, по мере отъезда экрана размывается (до 10px за полный вьюпорт),
   // чтобы обрезанный низ фото не читался «висящим в воздухе»
   useEffect(() => {
     const el = photosRef.current;
@@ -84,7 +84,7 @@ export default function Program() {
       raf = 0;
       const offset = Math.abs(section.getBoundingClientRect().top);
       const p = Math.min(1, offset / window.innerHeight);
-      el.style.filter = p > 0.002 ? `blur(${(24 * p).toFixed(1)}px)` : "";
+      el.style.filter = p > 0.002 ? `blur(${(10 * p).toFixed(1)}px)` : "";
     };
     const schedule = () => {
       if (!raf) raf = requestAnimationFrame(update);

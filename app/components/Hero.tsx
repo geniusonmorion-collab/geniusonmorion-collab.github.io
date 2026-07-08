@@ -277,12 +277,16 @@ export default function Hero() {
         </div>
       </div>
 
+      {/* hover-стили и переход — на внутренней обёртке: у .hero-item свой
+          transition для интро-каскада, который перекрыл бы hover-анимацию */}
       <a
         href="#register"
-        className="hero-item absolute bottom-[30px] left-[40px] flex h-[84px] w-[325px] items-center justify-center rounded-[10px] bg-[#131116] px-[40px] py-[20px] text-[20px] font-bold uppercase leading-[0.9] tracking-[-0.4px] text-white hover:opacity-90"
+        className="hero-item group absolute bottom-[30px] left-[40px] block h-[84px] w-[325px]"
         style={{ transitionDelay: "300ms" }}
       >
-        регистрация
+        <div className="flex size-full items-center justify-center rounded-[10px] bg-[#131116] px-[40px] py-[20px] text-[20px] font-bold uppercase leading-[0.9] tracking-[-0.4px] text-white transition-colors duration-300 ease-out group-hover:bg-white group-hover:text-[#131116]">
+          регистрация
+        </div>
       </a>
 
       {/* спикеры: клик по лицу переключает вариант */}
@@ -359,7 +363,7 @@ export default function Hero() {
                 alt={s.name}
                 width={72}
                 height={72}
-                className="size-[72px] rounded-full opacity-60 transition-opacity hover:opacity-100"
+                className="size-[72px] rounded-full opacity-50 transition-opacity hover:opacity-100"
               />
             </button>
           )
