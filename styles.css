@@ -2941,7 +2941,10 @@ h1 {
 }
 
 .case-study__hero--dolyami {
-  aspect-ratio: 1968 / 1342;
+  width: calc(100% + 2 * var(--case-gap));
+  aspect-ratio: 3 / 2;
+  position: relative;
+  left: calc(-1 * var(--case-gap));
 }
 
 .case-study__product-showcase--dolyami {

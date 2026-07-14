@@ -35,7 +35,7 @@ const cases = [
     subtitle: "Mobile payment flow",
     year: "2026",
     image: "./assets/cases/dolinew.png",
-    href: "./cases/dolyami/?v=dolyami-case",
+    href: "./cases/dolyami/?v=dolyami-hero-hq",
     alt: "Обложка кейса Долями с интерфейсом оплаты частями",
     tint: "e",
     category: "Product Design",
