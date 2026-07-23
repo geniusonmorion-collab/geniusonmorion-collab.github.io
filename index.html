@@ -12,7 +12,7 @@
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23161513'/%3E%3Cpath d='M20 18h24v6H30v8h12v6H30v8h15v6H20z' fill='%23fffaf2'/%3E%3C/svg%3E"
     />
-    <link rel="stylesheet" href="./styles.css?v=profile-copy-size" />
+    <link rel="stylesheet" href="./styles.css?v=kern-new-tab" />
   </head>
   <body>
     <aside class="profile" aria-label="Designer profile">
@@ -84,7 +84,7 @@
         <span aria-hidden="true"></span>
       </button>
       <footer class="viewer__meta">
-        <span class="viewer__count">01 / 14</span>
+        <span class="viewer__count">01 / 06</span>
         <span class="viewer__title">Case title</span>
         <span class="viewer__hint">Scroll or swipe</span>
       </footer>
@@ -93,12 +93,40 @@
     <div class="case-sheet" id="caseSheet" aria-hidden="true">
       <section class="case-sheet__surface" role="dialog" aria-modal="true" aria-label="Открытый кейс">
         <iframe class="case-sheet__frame" src="about:blank" title="Кейс" loading="eager"></iframe>
+        <div class="case-sheet__scroll-catcher" aria-hidden="true"></div>
       </section>
+      <div class="case-sheet__next-preview">
+        <div class="case-sheet__next-preview-card">
+          <iframe
+            class="case-sheet__next-preview-frame"
+            src="about:blank"
+            title="Следующий кейс"
+            loading="eager"
+            tabindex="-1"
+            aria-hidden="true"
+          ></iframe>
+          <button class="case-sheet__next-preview-button" type="button"></button>
+        </div>
+      </div>
+      <div class="case-sheet__all-projects" aria-hidden="true">
+        <svg class="case-sheet__all-projects-progress" viewBox="0 0 28 28" aria-hidden="true">
+          <circle class="case-sheet__all-projects-track" cx="14" cy="14" r="10" pathLength="1"></circle>
+          <circle class="case-sheet__all-projects-value" cx="14" cy="14" r="10" pathLength="1"></circle>
+        </svg>
+        <span>Все кейсы</span>
+      </div>
+      <div class="case-sheet__next">
+        <span class="case-sheet__next-label">Далее</span>
+        <button class="case-sheet__next-button" type="button">
+          <span class="case-sheet__next-dot" aria-hidden="true"></span>
+          <span class="case-sheet__next-title"></span>
+        </button>
+      </div>
       <button class="case-sheet__close" type="button" aria-label="Закрыть кейс">
         <span aria-hidden="true"></span>
       </button>
     </div>
 
-    <script src="./script.js?v=dolyami-hero-hq"></script>
+    <script src="./script.js?v=kern-new-tab"></script>
   </body>
 </html>

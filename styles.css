@@ -30,7 +30,7 @@
   --soft: #f3f3f3;
   --smoke: rgba(22, 21, 19, 0.08);
   --shadow: 0 24px 80px rgba(28, 25, 20, 0.1);
-  --grid-left: clamp(292px, 31vw, 420px);
+  --grid-left: clamp(300px, 25.9vw, 676px);
   --radius: 4px;
   --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
   --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -152,6 +152,13 @@ h3 {
   gap: 0;
   margin: 0 auto;
   padding: 0 var(--case-gap) clamp(72px, 7vw, 140px);
+}
+
+.case-embedded .case-study {
+  width: 100%;
+  max-width: none;
+  padding-inline: 0;
+  padding-bottom: 0;
 }
 
 .case-study figure {
@@ -626,7 +633,7 @@ h3 {
   inset: 0 auto 0 0;
   z-index: 2;
   width: var(--grid-left);
-  padding: clamp(36px, 7vh, 72px) clamp(28px, 6.2vw, 88px);
+  padding: clamp(36px, 5vh, 58px) clamp(32px, 4.2vw, 110px);
   background: linear-gradient(90deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.16));
   font-family: -apple-system, BlinkMacSystemFont, sans-serif;
   letter-spacing: -0.01em;
@@ -634,7 +641,7 @@ h3 {
 }
 
 .profile__inner {
-  max-width: 244px;
+  max-width: 300px;
   min-height: 100%;
   display: flex;
   flex-direction: column;
@@ -862,7 +869,7 @@ h1 {
 .case-list {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  gap: 20px;
 }
 
 .work-card {
@@ -961,7 +968,7 @@ h1 {
   position: relative;
   overflow: hidden;
   border: 0;
-  border-radius: 8px;
+  border-radius: 0;
   background: #f1f0ed;
   box-shadow: none;
   transition:
@@ -1016,7 +1023,7 @@ h1 {
   position: relative;
   overflow: hidden;
   border: 0;
-  border-radius: 12px;
+  border-radius: 0;
   outline: 0;
   background: transparent;
   box-shadow: none;
@@ -1028,7 +1035,7 @@ h1 {
 }
 
 .case--wide:not(:first-child) .gallery {
-  aspect-ratio: 1280 / 760;
+  aspect-ratio: 1904 / 1292;
 }
 
 .gallery-track {
@@ -1055,6 +1062,18 @@ h1 {
   height: 100%;
   display: block;
   object-fit: cover;
+}
+
+.slide--source,
+.slide--device {
+  background: linear-gradient(180deg, #f7f7f7 0%, #eaeaea 100%);
+}
+
+.slide--device img {
+  width: 51.16%;
+  height: 74.3%;
+  inset: 12.8% auto auto 24.42%;
+  object-fit: contain;
 }
 
 .sber-cover-media {
@@ -1117,6 +1136,7 @@ h1 {
 }
 
 .case-meta {
+  min-height: 48px;
   position: relative;
   z-index: 1;
   overflow: hidden;
@@ -1269,6 +1289,28 @@ h1 {
   line-height: inherit;
   text-align: right;
   white-space: nowrap;
+}
+
+.case-meta .top-bar {
+  padding-right: 0;
+  padding-left: 0;
+}
+
+.case-meta__title {
+  grid-column: 1 / span 4;
+  justify-self: start;
+}
+
+.case-meta__subtitle {
+  grid-column: 5 / span 4;
+  justify-self: center;
+  color: var(--ink);
+}
+
+.case-meta .top-bar .year {
+  grid-column: 9 / span 4;
+  justify-self: end;
+  margin-right: 0;
 }
 
 .accordion-container {
@@ -2177,18 +2219,39 @@ h1 {
 }
 
 .case-sheet {
-  --case-sheet-top: clamp(8px, 1.25vw, 20px);
+  --case-sheet-control-gutter: 24px;
+  --case-sheet-overscroll-progress: 0;
+  --case-sheet-next-overscroll-progress: 0;
+  --case-sheet-next-preview-y: 0px;
+  --case-sheet-scale: 0.9625;
+  --case-sheet-top: 80px;
   position: fixed;
   inset: 0;
   z-index: 40;
-  padding-top: var(--case-sheet-top);
-  background: rgba(0, 0, 0, 0.08);
+  overflow-x: hidden;
+  overflow-y: auto;
+  /* none (а не contain): без нативного резинового отскока macOS,
+     иначе на границах скролла из-под контента мигает белая подложка */
+  overscroll-behavior: none;
+  scrollbar-width: none;
+  padding: var(--case-sheet-top) 0 0;
+  background: #fff;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
   transition:
     opacity 360ms ease,
     visibility 0s linear 720ms;
+}
+
+.case-sheet::-webkit-scrollbar {
+  display: none;
+}
+
+@media (min-width: 1536px) {
+  .case-sheet {
+    --case-sheet-control-gutter: 64px;
+  }
 }
 
 .case-sheet.is-open {
@@ -2200,32 +2263,311 @@ h1 {
 
 .case-sheet__surface {
   width: 100%;
-  height: calc(100vh - var(--case-sheet-top));
-  height: calc(100dvh - var(--case-sheet-top));
+  min-height: calc(100vh - var(--case-sheet-top));
+  min-height: calc(100dvh - var(--case-sheet-top));
   position: relative;
   overflow: hidden;
   border-radius: 20px 20px 0 0;
   background: #fff;
-  box-shadow: 0 -18px 54px rgba(0, 0, 0, 0.08);
-  opacity: 0;
-  transform: translateY(110px) scale(0.965);
-  transform-origin: center top;
-  transition:
-    opacity 420ms ease,
-    transform 720ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.case-sheet.is-open .case-sheet__surface {
+  box-shadow: none;
+  /* Как в оригинале alvinn: карточка въезжает целиком из-за нижнего края
+     экрана (y = высота вьюпорта, scale 0.9), без фейда */
   opacity: 1;
-  transform: translateY(0) scale(1);
+  transform: translateY(100vh) scale(0.9);
+  transform-origin: center top;
+  will-change: transform;
+  transition:
+    opacity 300ms ease,
+    transform 700ms cubic-bezier(0.81, 0.03, 0.06, 1),
+    box-shadow 500ms ease;
 }
 
-.case-sheet__frame {
+/* Закрытие — как exit в оригинале: y → 100px, фейд, 300ms [.32,0,.67,0] */
+.case-sheet.is-closing .case-sheet__surface {
+  opacity: 0;
+  transform: translateY(100px) scale(var(--case-sheet-s, 1));
+  transition:
+    opacity 300ms cubic-bezier(0.32, 0, 0.67, 0),
+    transform 300ms cubic-bezier(0.32, 0, 0.67, 0);
+}
+
+.case-sheet.is-open.is-ready .case-sheet__surface {
+  opacity: var(--case-sheet-op, 1);
+  transform: translateY(var(--case-sheet-y, 0px))
+    scale(var(--case-sheet-s, var(--case-sheet-scale)));
+  transform-origin: var(--case-sheet-origin, center top);
+}
+
+/* После открытия transform ведёт JS покадрово от позиции скролла —
+   CSS-переход на transform здесь лагает и дёргает, поэтому убран */
+.case-sheet.is-open.is-ready.is-settled .case-sheet__surface {
+  transition:
+    opacity 300ms ease,
+    border-radius 500ms cubic-bezier(0.33, 1, 0.68, 1),
+    box-shadow 500ms ease;
+}
+
+.case-sheet.is-ending .case-sheet__surface:not(.case-sheet__surface--entering) {
+  border-radius: 20px;
+}
+
+.case-sheet.is-open.is-ready
+  .case-sheet__surface.case-sheet__surface--entering {
+  position: fixed;
+  top: var(--case-sheet-top);
+  left: 0;
+  z-index: 4;
+  /* Оригинал не фейдит входящую карточку — она всегда opacity 1 */
+  opacity: 1;
+  pointer-events: none;
+  transform: translate3d(
+      var(--case-sheet-entry-x, 0),
+      var(--case-sheet-entry-y, 100px),
+      0
+    )
+    scale(var(--case-sheet-entry-scale, 0.9));
+  /* Явный origin: иначе с конца страницы наследуется center bottom
+     из --case-sheet-origin и стартовая поза считается от низа */
+  transform-origin: center top;
+  transition: transform 700ms cubic-bezier(0.81, 0.03, 0.06, 1);
+  will-change: transform;
+}
+
+.case-sheet.is-open.is-ready
+  .case-sheet__surface.case-sheet__surface--entering.case-sheet__surface--visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate3d(0, 0, 0) scale(var(--case-sheet-scale));
+}
+
+.case-sheet__surface--leaving {
+  pointer-events: none;
+}
+
+.case-sheet.is-switching .case-sheet__next {
+  opacity: 0;
+  pointer-events: none;
+  transition-delay: 0s;
+}
+
+/* Контейнер превью не двигается при дотяжке — иначе из-под него
+   (последний элемент потока) вылезает белая полоса внизу экрана */
+.case-sheet__next-preview {
+  width: 100%;
+  height: 18rem;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  margin-top: 0;
+  background: #fff;
+}
+
+/* Без затухания из opacity: 0 — белый контейнер мигал при прокрутке у конца.
+   Масштаб карточки ведёт JS покадрово от скролла (--case-sheet-preview-s) */
+.case-sheet__next-preview-card {
+  width: 100%;
+  height: 64em;
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px 20px 0 0;
+  background: #fff;
+  /* Tilt при нажатии — как в оригинале: наклон к точке касания,
+     perspective 100vw, scale 0.99 (переменные ставит JS на pointerdown) */
+  transform: perspective(100vw)
+    rotateX(var(--case-sheet-tilt-rx, 0deg))
+    rotateY(var(--case-sheet-tilt-ry, 0deg))
+    scale(
+      calc(
+        var(--case-sheet-preview-s, calc(var(--case-sheet-scale) * 0.9)) *
+          var(--case-sheet-tilt-scale, 1)
+      )
+    );
+  transform-origin: center top;
+  will-change: transform;
+}
+
+/* Переход только на время нажатия — скролл-обновления масштаба
+   идут покадрово и не должны сглаживаться CSS-переходом */
+.case-sheet__next-preview-card.is-tilting {
+  transition: transform 200ms cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+/* При дотяжке вниз контент превью подъезжает внутри обрезки —
+   движение есть, а подложка из-под контейнера не показывается */
+.case-sheet__next-preview-frame {
   width: 100%;
   height: 100%;
   display: block;
   border: 0;
   background: #fff;
+  pointer-events: none;
+  transform: translateY(var(--case-sheet-next-preview-y, 0px));
+}
+
+.case-sheet__next-preview-button {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.case-sheet__frame {
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: block;
+  border: 0;
+  background: #fff;
+  opacity: 0;
+  transition: opacity 240ms ease 80ms;
+}
+
+.case-sheet__scroll-catcher {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: transparent;
+  cursor: default;
+  touch-action: pan-y;
+}
+
+.case-sheet__all-projects {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  z-index: 43;
+  padding: 8px 14px 8px 10px;
+  border-radius: 999px;
+  background: #ededed;
+  color: #1a1b1b;
+  font-size: 14px;
+  line-height: 1;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 20px);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  transition:
+    opacity 200ms ease,
+    transform 300ms cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.case-sheet.is-overscrolling .case-sheet__all-projects {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.case-sheet__all-projects-progress {
+  width: 24px;
+  height: 24px;
+  margin-right: 8px;
+  overflow: visible;
+  transform: rotate(-90deg);
+}
+
+.case-sheet__all-projects-track,
+.case-sheet__all-projects-value {
+  fill: none;
+  stroke-width: 2;
+}
+
+.case-sheet__all-projects-track {
+  stroke: rgba(0, 0, 0, 0.16);
+}
+
+.case-sheet__all-projects-value {
+  stroke: #1a1b1b;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: calc(1 - var(--case-sheet-overscroll-progress));
+}
+
+.case-sheet__next {
+  --case-sheet-next-accent: #fff;
+  display: flex;
+  align-items: center;
+  position: fixed;
+  top: 24px;
+  right: var(--case-sheet-control-gutter);
+  z-index: 43;
+  color: #777;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(20px);
+  transition:
+    opacity 500ms cubic-bezier(0.33, 1, 0.68, 1) 300ms,
+    transform 500ms cubic-bezier(0.33, 1, 0.68, 1) 300ms;
+}
+
+.case-sheet.is-open .case-sheet__next {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.case-sheet.is-overscrolling .case-sheet__next {
+  opacity: 0;
+  pointer-events: none;
+  transition-delay: 0s;
+  transition-duration: 200ms;
+}
+
+.case-sheet__next-label {
+  margin-right: 16px;
+  font-size: 16px;
+}
+
+.case-sheet__next-button {
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  border: 0;
+  border-radius: 999px;
+  padding: 12px 18px;
+  background: #ededed;
+  color: #1a1b1b;
+  font: inherit;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    color 200ms cubic-bezier(0.33, 1, 0.68, 1),
+    background 200ms cubic-bezier(0.33, 1, 0.68, 1),
+    transform 200ms cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.case-sheet__next-dot {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  margin-right: 12px;
+  border-radius: 50%;
+  background: var(--case-sheet-next-accent);
+  transition: background 200ms cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+/* Ховер — как в оригинале: инверсия в акцентный цвет следующего кейса
+   (фон → акцент, текст и точка → тёмные) */
+.case-sheet__next-button:hover {
+  background: var(--case-sheet-next-accent);
+  color: #1a1b1b;
+}
+
+.case-sheet__next-button:hover .case-sheet__next-dot {
+  background: #1a1b1b;
+}
+
+.case-sheet__next-button:active {
+  transform: scale(0.95);
+}
+
+.case-sheet.is-ready .case-sheet__frame {
+  opacity: 1;
 }
 
 .case-sheet__close {
@@ -2234,29 +2576,46 @@ h1 {
   display: grid;
   place-items: center;
   position: fixed;
-  top: calc(var(--case-sheet-top) + 14px);
-  left: 14px;
+  top: 24px;
+  left: var(--case-sheet-control-gutter);
   z-index: 42;
   border-radius: 999px;
-  background: rgba(24, 24, 24, 0.72);
-  color: #fff;
+  background: #ededed;
+  color: #1a1b1b;
   opacity: 0;
-  transform: translateY(14px);
+  transform: translateY(20px);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
+  /* Короткие переходы — для hover и прожатия (200ms, кривая оригинала).
+     Появление сделано keyframes-анимацией ниже, чтобы не занимать transform */
   transition:
-    opacity 240ms ease 120ms,
-    transform 420ms cubic-bezier(0.22, 1, 0.36, 1) 120ms,
-    background 180ms ease;
+    opacity 200ms ease,
+    transform 200ms cubic-bezier(0.33, 1, 0.68, 1),
+    background 200ms cubic-bezier(0.33, 1, 0.68, 1);
 }
 
+/* Появление — как контролы шапки оригинала: delay 300ms, 500ms [.33,1,.68,1] */
 .case-sheet.is-open .case-sheet__close {
   opacity: 1;
   transform: translateY(0);
+  animation: case-sheet-control-in 500ms cubic-bezier(0.33, 1, 0.68, 1) 300ms backwards;
+}
+
+@keyframes case-sheet-control-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
 }
 
 .case-sheet__close:hover {
-  background: rgba(0, 0, 0, 0.92);
+  background: #e1e1e1;
+}
+
+/* Прожатие — whileTap{scale:.95} оригинала, через transform (работает везде) */
+.case-sheet.is-open .case-sheet__close:active {
+  background: #dcdcdc;
+  transform: translateY(0) scale(0.95);
 }
 
 .case-sheet__close span,
@@ -2268,8 +2627,14 @@ h1 {
   background: currentColor;
 }
 
+/* Ховер — вращение крестика на 90°, как whileHover{rotate:90} в оригинале */
 .case-sheet__close span {
   transform: rotate(45deg);
+  transition: transform 200ms cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.case-sheet__close:hover span {
+  transform: rotate(135deg);
 }
 
 .case-sheet__close span::after {
@@ -2425,7 +2790,7 @@ h1 {
   }
 
   .case-list {
-    row-gap: 54px;
+    row-gap: 20px;
   }
 
   .case .gallery {
@@ -2460,7 +2825,7 @@ h1 {
 
 @media (max-width: 768px) {
   .case-caption {
-    display: grid;
+    display: none;
     grid-template-columns: 1fr;
     gap: 4px;
     padding: 12px;
@@ -2480,6 +2845,10 @@ h1 {
 
   .case-caption__arrow {
     flex-shrink: 0;
+  }
+
+  .case--with-meta .case-caption {
+    display: none;
   }
 }
 
@@ -2531,11 +2900,20 @@ h1 {
 
   .case-list {
     grid-template-columns: 1fr;
-    row-gap: 46px;
+    row-gap: 20px;
   }
 
   .case:not(:first-child) .gallery {
+    aspect-ratio: 952 / 1292;
+  }
+
+  .case--wide:not(:first-child) .gallery {
     aspect-ratio: 1904 / 1292;
+  }
+
+  .slide--device img {
+    width: 51.16%;
+    left: 24.42%;
   }
 
   .case-meta {
@@ -2668,19 +3046,51 @@ h1 {
   }
 
   .case-sheet {
-    --case-sheet-top: 6px;
+    --case-sheet-control-gutter: 12px;
+    --case-sheet-top: 64px;
   }
 
   .case-sheet__surface {
     border-radius: 12px 12px 0 0;
-    transform: translateY(72px) scale(0.98);
+    transform: translateY(100vh) scale(0.9);
   }
 
   .case-sheet__close {
     width: 40px;
     height: 40px;
-    top: 16px;
-    left: 10px;
+    top: 12px;
+    left: 12px;
+  }
+
+  .case-sheet__next {
+    top: 12px;
+    right: 12px;
+  }
+
+  .case-sheet__next-label {
+    display: none;
+  }
+
+  .case-sheet__next-button {
+    min-height: 40px;
+    max-width: 68vw;
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+
+  .case-sheet__next-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .case-sheet__next-preview {
+    height: 18rem;
+    margin-top: 0;
+  }
+
+  .case-sheet__next-preview-card {
+    border-radius: 12px 12px 0 0;
   }
 }
 
